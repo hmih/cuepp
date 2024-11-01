@@ -1,0 +1,54 @@
+#pragma once
+
+{{ $IDNT := "    " -}}
+{{ $INPUT := .Input -}}
+{{ $GLOBAL := $INPUT.Global -}}
+{{ if $GLOBAL.readValuesAtRuntime -}}
+#include <nlohmann/json.hpp>
+{{ end -}}
+{{ range $I := $GLOBAL.defaultIncludes -}}
+#include <{{ $I }}>
+{{ end -}}
+
+{{ range $CONF := $INPUT.Configurations -}}
+{{ range $I := $CONF.Includes -}}
+#include <{{ $I.Name }}>
+{{ end -}}
+
+{{ if $GLOBAL.readValuesAtRuntime }}
+using json = nlohmann::json;
+{{ end }}
+
+struct {{ $CONF.Name }} {
+{{ range $F := $CONF.Fields -}}
+    {{"    "}} {{ $F.Type }} {{ $F.Name -}}
+    {{ "{" -}}
+    {{ if $F.Literal -}}
+        {{ if eq $F.Literal.Type "string" -}}
+            {{ $F.Literal.Value | printf "%q" -}}
+        {{ else -}}
+            {{ $F.Literal.Value -}}
+        {{ end -}}
+    {{ end -}}
+    {{ "}" }};
+{{ end -}}
+};
+
+{{ if $GLOBAL.readValuesAtRuntime -}}
+namespace ns {
+    void to_json(json& j, const {{$CONF.Name}}& conf) {
+        j = json{
+{{ range $F := $CONF.Fields -}}
+    {{ $IDNT }}{{ $IDNT }}{{ $IDNT }}{{ "{" }}{{$F.Name | printf "%q"}}, conf.{{$F.Name}}{{ "}" -}},
+{{ end -}}
+{{ $IDNT }}{{ $IDNT }}};
+    }
+
+    void from_json(const json& j, {{$CONF.Name}}& conf) {
+{{ range $F := $CONF.Fields -}}
+    {{ $IDNT }}{{ $IDNT }}j.at({{$F.Name | printf "%q"}}).get_to(conf.{{$F.Name}});
+{{ end -}}
+{{ $IDNT }}}
+}
+{{ end -}}
+{{ end -}}
