@@ -7,7 +7,7 @@ package schema
 
 #Global: {
     readValuesAtRuntime: bool
-    defaultIncludes: ["vector", "string", "cstdint"]
+    defaultIncludes: [...string] | *["vector", "string", "cstdint"]
 }
 
 #Configuration: {
@@ -29,13 +29,5 @@ package schema
 
 #Literal: {
     Value: [v=_]: string | int | *null
-    Quote: bool | 
-}
-
-#Literal: {
-    Quote: if Value is string {
-        true
-    } else {
-        false
-    }
+    Quote: bool
 }
