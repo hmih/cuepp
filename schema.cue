@@ -1,4 +1,6 @@
-package schema
+package hofpp
+
+Templates: _ @embed(glob=./templates/*.go.tmpl)
 
 #Input: {
     Configurations: [...#Configuration]
