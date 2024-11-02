@@ -5,7 +5,7 @@ package schema
 }
 
 #Global: {
-    readValuesAtRuntime: bool
+    readValuesAtRuntime: bool | *false
     defaultIncludes: [...string] | *["vector", "string", "cstdint"]
 }
 
