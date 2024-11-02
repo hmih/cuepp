@@ -1,7 +1,6 @@
 package schema
 
 #Input: {
-    Global: #Global
     Configurations: [...#Configuration]
 }
 
@@ -24,10 +23,11 @@ package schema
 
 #Field: {
     Name: string
+    Type: string
     Literal: #Literal
 }
 
 #Literal: {
-    Value: [v=_]: string | int | *null
+    Value: string | int | *null
     Quote: bool
 }

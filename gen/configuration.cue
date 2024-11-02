@@ -6,9 +6,13 @@ import (
 )
 
 Configuration: hof.Generator & {
-    Input: [...schema.#Configuration]
+    Input: schema.#Input
     In: {
         GLOBAL: schema.#Global
     }
     Outdir: string | *"./out"
+    Templates: [...Templates] | *[Templates & {Globs: ["./templates/**/*"], TrimPrefix: "./templates/"}]
+    Partials: [...Templates] | *[Templates & {Globs: ["./partials/**/*"], TrimPrefix: "./partials/"}]
+    Statics: [...Statics] | *[Statics & {Globs: ["./static/**/*"], TrimPrefix: "./static/"}]
+
 }
