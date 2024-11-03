@@ -1,6 +1,6 @@
 @extern(embed)
 
-package hofpp
+package cuepp
 
 Templates: _ @embed(glob=templates/*.go.tmpl,type=text)
 
