@@ -1,8 +1,10 @@
 #pragma once
 
 {{ $IDNT := "    " -}}
-{{ $INPUT := .Input -}}
-{{ $GLOBAL := $INPUT.Global -}}
+{{ $TEMPLATE_DATA := . -}}
+{{ $GLOBAL := index $TEMPLATE_DATA 0 -}}
+{{ $INPUT := index $TEMPLATE_DATA 1 -}}
+
 {{ if $GLOBAL.readValuesAtRuntime -}}
 #include <nlohmann/json.hpp>
 {{ end -}}
@@ -10,45 +12,45 @@
 #include <{{ $I }}>
 {{ end -}}
 
-{{ range $CONF := $INPUT.Configurations -}}
-{{ range $I := $CONF.Includes -}}
-#include <{{ $I.Name }}>
+{{ range $I := $INPUT.includes -}}
+#include <{{ $I.name }}>
 {{ end -}}
 
 {{ if $GLOBAL.readValuesAtRuntime }}
 using json = nlohmann::json;
 {{ end }}
 
-struct {{ $CONF.Name }} {
-{{ range $F := $CONF.Fields -}}
-    {{"    "}} {{ $F.Type }} {{ $F.Name -}}
+namespace {{ $INPUT.namespace }} {
+{{ $INPUT.type }} {{ $INPUT.name }} {
+{{ range $F := $INPUT.fields -}}
+    {{"    "}} {{ $F.type }} {{ $F.name -}}
     {{ "{" -}}
-    {{ if $F.Literal -}}
-        {{ if eq $F.Literal.Type "string" -}}
-            {{ $F.Literal.Value | printf "%q" -}}
+    {{ if $F.literal -}}
+        {{ if $F.literal.quote -}}
+            {{ $F.literal.value | printf "%q" -}}
         {{ else -}}
-            {{ $F.Literal.Value -}}
+            {{ $F.literal.value -}}
         {{ end -}}
     {{ end -}}
     {{ "}" }};
 {{ end -}}
 };
+} // namespace {{ $INPUT.namespace }}
 
 {{ if $GLOBAL.readValuesAtRuntime -}}
 namespace ns {
-    void to_json(json& j, const {{$CONF.Name}}& conf) {
+    void to_json(json& j, const {{ $INPUT.type }} {{$INPUT.name}}& conf) {
         j = json{
-{{ range $F := $CONF.Fields -}}
-    {{ $IDNT }}{{ $IDNT }}{{ $IDNT }}{{ "{" }}{{$F.Name | printf "%q"}}, conf.{{$F.Name}}{{ "}" -}},
+{{ range $F := $INPUT.fields -}}
+    {{ $IDNT }}{{ $IDNT }}{{ $IDNT }}{{ "{" }}{{$F.name | printf "%q"}}, conf.{{$F.name}}{{ "}" -}},
 {{ end -}}
 {{ $IDNT }}{{ $IDNT }}};
     }
 
-    void from_json(const json& j, {{$CONF.Name}}& conf) {
-{{ range $F := $CONF.Fields -}}
-    {{ $IDNT }}{{ $IDNT }}j.at({{$F.Name | printf "%q"}}).get_to(conf.{{$F.Name}});
+    void from_json(const json& j, {{ $INPUT.type }} {{$INPUT.name}}& conf) {
+{{ range $F := $INPUT.fields -}}
+    {{ $IDNT }}{{ $IDNT }}j.at({{$F.name | printf "%q"}}).get_to(conf.{{$F.name}});
 {{ end -}}
 {{ $IDNT }}}
 }
-{{ end -}}
 {{ end -}}

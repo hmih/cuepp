@@ -1,37 +1,56 @@
-@extern(embed)
-
 package cuepp
 
-Templates: _ @embed(glob=templates/*.go.tmpl,type=text)
-
-#Input: {
-    Configurations: [...#Configuration]
+#generator: {
+    global: #global
+    input: #input
+    templates: #template
+    output: [...#file]
 }
 
-#Global: {
+#template: {
+    [name=string]: string
+}
+
+#input: {
+    [filename=string]: #configuration & { name: filename }
+}
+
+#global: {
     readValuesAtRuntime: bool | *false
     defaultIncludes: [...string] | *["vector", "string", "cstdint"]
 }
 
-#Configuration: {
-    Name: string,
-    Includes: [...#Include]
-    Fields: [...#Field]
+#file: {
+    filename: string
+    content: string
 }
 
-#Include: {
-    Name: string
-    Local: bool | *true
-    Guard: string | *""
+#configuration: {
+    name: string
+    namespace: string
+    type: *"struct" | "enum"
+    includes: [...#include]
+    fields: [...#field]
 }
 
-#Field: {
-    Name: string
-    Type: string
-    Literal: #Literal
+#include: {
+    name: string
+    local: bool | *true
+    guard: string | *""
 }
 
-#Literal: {
-    Value: string | int | *null
-    Quote: bool
+#field: {
+    name: string
+    type: string
+    literal: #literalString | #literalNumber | *null
+}
+
+#literalString: {
+    value: string
+    quote: bool | *true
+}
+
+#literalNumber: {
+    value: int | float
+    quote: bool | *false
 }
