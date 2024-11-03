@@ -1,6 +1,8 @@
+@extern(embed)
+
 package hofpp
 
-Templates: _ @embed(glob=./templates/*.go.tmpl)
+Templates: _ @embed(glob=templates/*.go.tmpl,type=text)
 
 #Input: {
     Configurations: [...#Configuration]
