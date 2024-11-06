@@ -11,46 +11,67 @@ generator: #generator & {
         readValuesAtRuntime: true
     }
     input: {
-        Parent: {
-            type: "struct"
-            namespace: "cv"
-            fields: [
-                {
-                    type: "std::string",
-                    name: "data",
-                    literal: value: "test"
-                },
-                {
-                    type: "uint8_t",
-                    name: "rows",
-                    literal: value: 4
-                },
-            ]
+        OneFile: {
+            Parent: {
+                type: "struct"
+                namespace: "cv"
+                fields: [
+                    {
+                        type: "std::string",
+                        name: "data",
+                        literal: value: "test"
+                    },
+                    {
+                        type: "uint8_t",
+                        name: "rows",
+                        literal: value: 4
+                    },
+                ]
+            }
+            Child: {
+                type: "struct"
+                namespace: "cv"
+                fields: [
+                    {
+                        type: "std::string",
+                        name: "child_data",
+                        literal: value: "example"
+                    },
+                    {
+                        type: "uint8_t",
+                        name: "columns",
+                        literal: value: 8
+                    },
+                ]
+            }
         }
-        Child: {
-            type: "struct"
-            namespace: "cv"
-            fields: [
-                {
-                    type: "std::string",
-                    name: "child_data",
-                    literal: value: "example"
-                },
-                {
-                    type: "uint8_t",
-                    name: "columns",
-                    literal: value: 8
-                },
-            ]
+        Second: {
+            AnotherOne: {
+                type: "enum"
+                namespace: "cv"
+                fields: [
+                    {
+                        name: "EXAMPLE",
+                        literal: value: 0
+                    },
+                    {
+                        name: "ANOTHER",
+                        literal: value: 1
+                    },
+                ]
+            }
         }
     }
     templates: {
         class: string @embed(file="templates/class.go.tmpl", type=text)
     }
     output: [
-        for name, data in generator.input {
+        for name, definitions in generator.input
             filename: name + ".hpp"
-            content: go.Execute(templates.class, [generator.global, data])
+            content: go.Execute(
+                templates.class,
+                [generator.global, definitions]
+            )
         }
     ]
 }

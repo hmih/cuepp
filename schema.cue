@@ -12,7 +12,9 @@ package cuepp
 }
 
 #input: {
-    [filename=string]: #configuration & { name: filename }
+    [filename=string]: {
+        [definition=string]: #configuration & { name: definition }
+    }
 }
 
 #global: {
@@ -25,10 +27,12 @@ package cuepp
     content: string
 }
 
+#configurationType: *"struct" | "enum"
+
 #configuration: {
     name: string
     namespace: string
-    type: *"struct" | "enum"
+    type: #configurationType
     includes: [...#include]
     fields: [...#field]
 }
@@ -36,12 +40,12 @@ package cuepp
 #include: {
     name: string
     local: bool | *true
-    guard: string | *""
+    guard: string
 }
 
 #field: {
     name: string
-    type: string
+    type?: string
     literal: #literalString | #literalNumber | *null
 }
 

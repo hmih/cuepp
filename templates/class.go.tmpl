@@ -3,7 +3,8 @@
 {{ $IDNT := "    " -}}
 {{ $TEMPLATE_DATA := . -}}
 {{ $GLOBAL := index $TEMPLATE_DATA 0 -}}
-{{ $INPUT := index $TEMPLATE_DATA 1 -}}
+{{ $NAME := index $TEMPLATE_DATA 1 -}}
+{{ $INPUT := index $TEMPLATE_DATA 2 -}}
 
 {{ if $GLOBAL.readValuesAtRuntime -}}
 #include <nlohmann/json.hpp>
@@ -21,7 +22,14 @@ using json = nlohmann::json;
 {{ end }}
 
 namespace {{ $INPUT.namespace }} {
-{{ $INPUT.type }} {{ $INPUT.name }} {
+{{ if eq $INPUT.type "enum" -}}
+{{ $INPUT.type }} {{ $NAME }} {
+{{ range $F := $INPUT.fields -}}
+    {{"    "}} {{ $F.name }} = {{ $F.literal.value }},
+{{ end -}}
+};
+{{ else -}}
+{{ $INPUT.type }} {{ $NAME }} {
 {{ range $F := $INPUT.fields -}}
     {{"    "}} {{ $F.type }} {{ $F.name -}}
     {{ "{" -}}
@@ -35,6 +43,7 @@ namespace {{ $INPUT.namespace }} {
     {{ "}" }};
 {{ end -}}
 };
+{{ end -}}
 } // namespace {{ $INPUT.namespace }}
 
 {{ if $GLOBAL.readValuesAtRuntime -}}
