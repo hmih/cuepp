@@ -63,14 +63,15 @@ generator: #generator & {
         }
     }
     templates: {
-        class: string @embed(file="templates/class.go.tmpl", type=text)
+        minimal: string @embed(file="templates/minimal.go.tmpl", type=text)
     }
     output: [
         for name, definitions in generator.input
+        {
             filename: name + ".hpp"
             content: go.Execute(
-                templates.class,
-                [generator.global, definitions]
+                templates.minimal,
+                [generator.global, name, definitions]
             )
         }
     ]

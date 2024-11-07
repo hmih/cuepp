@@ -1,0 +1,69 @@
+#pragma once
+
+{{ $IDNT := "    " -}}
+{{ $TEMPLATE_DATA := . -}}
+{{ $GLOBAL := index $TEMPLATE_DATA 0 -}}
+{{ $FILENAME := index $TEMPLATE_DATA 1 -}}
+{{ $DEFINITIONS := index $TEMPLATE_DATA 2 -}}
+
+{{ range $def := $DEFINITIONS -}}
+{{ range $i := $def.includes -}}
+#include <{{ $i.name }}>
+{{ end -}}
+{{ end -}}
+
+{{ range $i := $GLOBAL.defaultIncludes -}}
+#include <{{ $i }}>
+{{ end -}}
+
+{{ if $GLOBAL.readValuesAtRuntime }}
+#include <nlohmann/json.hpp>
+{{ end }}
+
+{{ range $def := $DEFINITIONS -}}
+namespace {{ $def.namespace }} {
+{{ if eq $def.type "enum" -}}
+
+enum {{ $def.name }} {
+{{ range $f := $def.fields -}}
+{{ $IDNT }} {{ $f.name }} = {{ $f.literal.value }},
+{{ end -}}
+};
+
+{{ if $GLOBAL.readValuesAtRuntime -}}
+NLOHMANN_JSON_SERIALIZE_ENUM({{ $def.name }}, {
+{{ range $f := $def.fields -}}
+{{ $IDNT }} { {{ $f.name }}, {{ $f.name | printf "%q" }} },
+{{ end -}}
+})
+{{ end -}}
+
+{{ else -}}
+
+struct {{ $def.name }} {
+{{ range $f := $def.fields -}}
+    {{ $IDNT }} {{ $f.type }} {{ $f.name -}}
+    {{ "{" -}}
+    {{ if $f.literal -}}
+        {{ if $f.literal.quote -}}
+            {{ $f.literal.value | printf "%q" -}}
+        {{ else -}}
+            {{ $f.literal.value -}}
+        {{ end -}}
+    {{ end -}}
+    {{ "}" }};
+{{ end -}}
+};
+
+{{ if $GLOBAL.readValuesAtRuntime -}}
+NLOHMANN_DEFINE_TYPE_NON_INTRUSIVE(
+{{ $IDNT }} {{ $def.name }},
+{{ range $f := $def.fields -}}
+{{ $IDNT }} {{ $f.name }},
+{{ end -}}
+)
+{{ end -}}
+
+{{ end -}}
+} // namespace {{ $def.namespace }}
+{{ end }}
